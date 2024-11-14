@@ -12,6 +12,7 @@
     <url>http://maven.apache.org</url>
 
     <properties>
+        <opensearch.version>3.0.0-SNAPSHOT</opensearch.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -20,6 +21,11 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
             <version>1.15.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opensearch</groupId>
+            <artifactId>opensearch-secure-sm</artifactId>
+            <version>${opensearch.version}</version>
         </dependency>
     </dependencies>
     
