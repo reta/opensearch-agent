@@ -1,13 +1,8 @@
 package org.opensearch.javaagent;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.nio.channels.SocketChannel;
-import java.nio.file.Files;
 import java.util.Map;
-
-import org.opensearch.secure_sm.SecureSM;
-import org.opensearch.secure_sm.ThreadPermission;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -37,15 +32,14 @@ public class Agent {
 	                .visit(Advice.to(SocketChannelInterceptor.class).on(ElementMatchers.named("connect")
 	                    .and(ElementMatchers.not(ElementMatchers.isAbstract()))));
 
-          final File temp = Files.createTempDirectory("tmp").toFile();
-          ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(Map.of(
-              new TypeDescription.ForLoadedType(SecureSM.class), ClassFileLocator.ForClassLoader.read(SecureSM.class),
-              new TypeDescription.ForLoadedType(ThreadPermission.class), ClassFileLocator.ForClassLoader.read(ThreadPermission.class)));
+          ClassInjector.UsingUnsafe.ofBootLoader().inject(Map.of(
+              new TypeDescription.ForLoadedType(StackCallerChainExtractor.class), ClassFileLocator.ForClassLoader.read(StackCallerChainExtractor.class)));
 
 	     final ByteBuddy byteBuddy = new ByteBuddy().with(Implementation.Context.Disabled.Factory.INSTANCE);
 	     final AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
              .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
              .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
+             .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
              .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
              .ignore(ElementMatchers.none())
              .type(systemType)
